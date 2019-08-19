@@ -3,7 +3,7 @@ import Router from 'vue-router'
 import GMap from '@/components/home/GMap'
 import Signup from '@/components/auth/Signup'
 import Login from '@/components/auth/Login'
-
+import firebase from 'firebase'
 Vue.use(Router)
 
 const router = new Router({
@@ -33,6 +33,17 @@ router.beforeEach((to,from, next)=>{
   // Check to see if route requires auth
   // Check how this works later on
   if(to.matched.some(rec => rec.meta.requiresAuth)){
-
+    let user = firebase.auth().currentUser
+    if(user){
+      // User signed in proceed to next route
+      next()
+    }else{
+      // No user signed in
+      next({name: 'Login'})
+    }
+  }else{
+    next()
   }
 })
+
+export default router

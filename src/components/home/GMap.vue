@@ -24,7 +24,24 @@ export default {
                 minZoom: 3,
                 streetViewControl: false
             })
-
+            db.collection('user').get().then(users=>{
+                users.forEach(doc=>{
+                    let data = doc.data()
+                    if(data.geolocation){
+                        let marker = new google.maps.Marker({
+                            position:{
+                                lat: data.geolocation.lat,
+                                lng: data.geolocation.lng
+                            },
+                            map: map
+                        })
+                        // Add click event to marker
+                        marker.addListener('click', ()=>{
+                            console.log(doc.id)
+                        })
+                    }
+                })
+            })
         }
     },
     mounted(){
