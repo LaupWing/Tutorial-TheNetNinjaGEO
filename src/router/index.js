@@ -6,12 +6,15 @@ import Login from '@/components/auth/Login'
 
 Vue.use(Router)
 
-export default new Router({
+const router = new Router({
   routes: [
     {
       path: '/',
       name: 'GMap',
-      component: GMap
+      component: GMap,
+      meta:{
+        requiresAuth: true
+      }
     },
     {
       path: '/signup',
@@ -24,4 +27,12 @@ export default new Router({
       component: Login
     }
   ]
+})
+
+router.beforeEach((to,from, next)=>{
+  // Check to see if route requires auth
+  // Check how this works later on
+  if(to.matched.some(rec => rec.meta.requiresAuth)){
+
+  }
 })

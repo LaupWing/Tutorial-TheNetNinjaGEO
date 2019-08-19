@@ -6,6 +6,7 @@
 
 <script>
 import firebase from 'firebase'
+import db from '@/firebase/init'
 export default {
     name: 'GMap',
     data(){
@@ -27,8 +28,36 @@ export default {
         }
     },
     mounted(){
-        this.renderMap()
-        console.log(firebase.auth().currentUser)
+        //Get current user
+        let user = firebase.auth().currentUser
+        if(navigator.geolocation){
+            navigator.geolocation.getCurrentPosition(pos=>{
+                this.lat = pos.coords.latitude
+                this.lng = pos.coords.longitude
+                console.log(user)
+                db.collection('user')
+                    .where('user_id', '==', user.uid) 
+                    .get()
+                    .then(snapshot=>{
+                        snapshot.forEach((doc)=>{
+                            db.collection('user').doc(doc.id).update({
+                                geolocation:{
+                                    lat : pos.coords.latitude,
+                                    lng: pos.coords.longitude
+                                }
+                            })
+                        })
+                    })   
+                this.renderMap()
+            }, (err)=>{
+                console.log(err)
+                this.renderMap()
+            },{maximumAge: 60000, timeout: 3000}) // look for the cached geolocation if it takes more then 3000 ms it will just render the map
+        }
+        else{
+            // Position center by defualt values
+            this.renderMap()
+        }
     }
 }
 </script>
