@@ -25,7 +25,7 @@
 <script>
 import slugify from 'slugify'
 import db from '@/firebase/init'
-
+import firebase from 'firebase'
 export default {
     name: 'Signup',
     data(){
@@ -39,7 +39,7 @@ export default {
     },
     methods:{
         signup(){
-            if(this.alias){
+            if(this.alias && this.email && this.password){
                 this.slug = slugify(this.alias,{
                     replacement: '-',
                     remove: /[$*_+~.()'"!/-:@]/g,
@@ -48,15 +48,30 @@ export default {
                 let ref = db.collection('user').doc(this.slug)
                 ref.get().then((doc)=>{
                     // Check of het bestaat
-                    if(doc.exist){
+                    if(doc.exists){
                         this.feedback = "This alias already exist"
                     }else{
-                        this.feedback = 'This alias is free to use'
+                        firebase.auth().createUserWithEmailAndPassword(this.email, this.password)
+                            .then(cred=>{
+                                const user = cred.user
+                                ref.set({
+                                    alias:this.alias,
+                                    geolocation: null,
+                                    user_id: user.uid 
+                                })
+                            })
+                            .then(()=>{
+                                this.$router.push({name: 'GMap'})
+                            })
+                            .catch(err=>{
+                                this.feedback = err.message
+                                console.log(err)
+                            })
                     }
                 })
                 console.log(this.slug)
             }else{
-                this.feedback = 'You must enter an alias'
+                this.feedback = 'You must enter an all fields'
             }
         }
     }
