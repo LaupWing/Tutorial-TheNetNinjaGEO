@@ -26,6 +26,8 @@
 import slugify from 'slugify'
 import db from '@/firebase/init'
 import firebase from 'firebase'
+import functions from 'firebase/functions'
+
 export default {
     name: 'Signup',
     data(){
@@ -45,6 +47,11 @@ export default {
                     remove: /[$*_+~.()'"!/-:@]/g,
                     lower: true
                 })
+                let checkAlias = firebase.functions().httpsCallable('checkAlias')
+                checkAlias(({slug:this.sug}))
+                    .then(result=>{
+                        console.log(result)
+                    })
                 let ref = db.collection('user').doc(this.slug)
                 ref.get().then((doc)=>{
                     // Check of het bestaat

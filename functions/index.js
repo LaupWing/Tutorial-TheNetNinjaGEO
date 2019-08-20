@@ -1,8 +1,16 @@
 const functions = require('firebase-functions');
-
-// // Create and Deploy Your First Cloud Functions
-// // https://firebase.google.com/docs/functions/write-firebase-functions
-//
-// exports.helloWorld = functions.https.onRequest((request, response) => {
-//  response.send("Hello from Firebase!");
-// });
+const admin = require('firebase-admin')
+admin.initializeApp()
+exports.checkAlias = functions.https.onCall((data,context)=>{
+    // data paremter = every data called with this function
+    // context paramter = context of the funciton called like userAuthStatus
+    const ref = admin.firestore().collection('user').doc(data.slug)
+    return ref.get().then(doc=>{
+        return {
+            unique: !doc.exists
+        }
+    })
+    .catch(err=>{
+        throw new functions.https.HttpsError('failed to connect')
+    })
+})
