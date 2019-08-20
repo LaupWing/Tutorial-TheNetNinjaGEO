@@ -48,35 +48,55 @@ export default {
                     lower: true
                 })
                 let checkAlias = firebase.functions().httpsCallable('checkAlias')
-                checkAlias(({slug:this.sug}))
-                    .then(result=>{
-                        console.log(result)
-                    })
-                let ref = db.collection('user').doc(this.slug)
-                ref.get().then((doc)=>{
-                    // Check of het bestaat
-                    if(doc.exists){
-                        this.feedback = "This alias already exist"
+                checkAlias({slug:this.slug}).then(result=>{
+                    if(!result.data.unique){
+                        this.feedback = 'This alias already exist'
                     }else{
-                        firebase.auth().createUserWithEmailAndPassword(this.email, this.password)
+                        firebase.auth().createUserWithEmailAndPassword(this.email,this.password)
                             .then(cred=>{
                                 const user = cred.user
-                                ref.set({
-                                    alias:this.alias,
+                                db.collection('user').doc(this.slug).set({
+                                    alias: this.alias,
                                     geolocation: null,
-                                    user_id: user.uid 
+                                    user_id: user.uid
                                 })
                             })
                             .then(()=>{
-                                this.$router.push({name: 'GMap'})
+                                this.$router.push({name:'GMap'})
                             })
                             .catch(err=>{
                                 this.feedback = err.message
                                 console.log(err)
                             })
                     }
+
                 })
-                console.log(this.slug)
+                
+                // let ref = db.collection('user').doc(this.slug)
+                // ref.get().then((doc)=>{
+                //     // Check of het bestaat
+                //     if(doc.exists){
+                //         this.feedback = "This alias already exist"
+                //     }else{
+                //         firebase.auth().createUserWithEmailAndPassword(this.email, this.password)
+                //             .then(cred=>{
+                //                 const user = cred.user
+                //                 ref.set({
+                //                     alias:this.alias,
+                //                     geolocation: null,
+                //                     user_id: user.uid 
+                //                 })
+                //             })
+                //             .then(()=>{
+                //                 this.$router.push({name: 'GMap'})
+                //             })
+                //             .catch(err=>{
+                //                 this.feedback = err.message
+                //                 console.log(err)
+                //             })
+                //     }
+                // })
+                // console.log(this.slug)
             }else{
                 this.feedback = 'You must enter an all fields'
             }
